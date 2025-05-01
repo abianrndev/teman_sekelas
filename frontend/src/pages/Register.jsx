@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const Register = () => {
@@ -73,106 +72,120 @@ const Register = () => {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-			<div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-				<div>
-					<h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-						Daftar Akun Baru
-					</h2>
-					<p className="mt-2 text-center text-sm text-gray-600">
-						Atau{' '}
-						<Link to="/login" className="font-medium text-green-600 hover:text-green-500">
-							masuk ke akun yang sudah ada
-						</Link>
-					</p>
+		<div className="min-h-screen flex items-center justify-center p-4">
+			<div className="max-w-4xl w-full flex bg-white/80 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden">
+				{/* Bagian kiri - Area Dekoratif */}
+				<div className="hidden lg:block lg:w-1/2 bg-gradient-to-br from-purple-600 to-purple-800 p-8 text-white">
+					<div className="h-full flex flex-col justify-between">
+						<h2 className="text-3xl font-bold mb-4">Bergabung Bersama Kami!</h2>
+						<p className="text-purple-100">
+							Daftar sekarang dan nikmati semua fitur yang kami sediakan
+						</p>
+					</div>
 				</div>
-				<form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+
+				{/* Bagian kanan - Form Register */}
+				<div className="w-full lg:w-1/2 p-8">
+					<div className="mb-8">
+						<h1 className="text-2xl font-bold text-purple-700 mb-1">Daftar Akun Baru</h1>
+						<p className="text-gray-600">Silakan isi data diri Anda</p>
+					</div>
+
 					{error && (
-						<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+						<div className="mb-4 bg-red-100/80 backdrop-blur-sm border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
 							<span className="block sm:inline">{error}</span>
 						</div>
 					)}
-					<div className="rounded-md shadow-sm -space-y-px">
+
+					<form onSubmit={handleSubmit} className="space-y-4">
 						<div>
-							<label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+							<label className="block text-sm font-medium text-gray-700 mb-2">
+								Nama Lengkap
+							</label>
 							<input
-								id="name"
-								name="name"
 								type="text"
-								required
-								className={`appearance-none relative block w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'
-									} placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm`}
-								placeholder="Nama Lengkap"
+								name="name"
 								value={formData.name}
 								onChange={handleChange}
+								className={`w-full px-4 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'
+									} rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white/50 backdrop-blur-sm`}
+								required
 							/>
 							{errors.name && (
 								<p className="mt-1 text-sm text-red-600">{errors.name}</p>
 							)}
 						</div>
+
 						<div>
-							<label htmlFor="email" className="sr-only">Email</label>
+							<label className="block text-sm font-medium text-gray-700 mb-2">
+								Email
+							</label>
 							<input
-								id="email"
-								name="email"
 								type="email"
-								required
-								className={`appearance-none relative block w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'
-									} placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm`}
-								placeholder="Email"
+								name="email"
 								value={formData.email}
 								onChange={handleChange}
+								className={`w-full px-4 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'
+									} rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white/50 backdrop-blur-sm`}
+								required
 							/>
 							{errors.email && (
 								<p className="mt-1 text-sm text-red-600">{errors.email}</p>
 							)}
 						</div>
+
 						<div>
-							<label htmlFor="classCode" className="sr-only">Kode Kelas</label>
+							<label className="block text-sm font-medium text-gray-700 mb-2">
+								Kode Kelas
+							</label>
 							<input
-								id="classCode"
-								name="classCode"
 								type="text"
-								required
-								className={`appearance-none relative block w-full px-3 py-2 border ${errors.classCode ? 'border-red-500' : 'border-gray-300'
-									} placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm`}
-								placeholder="Kode Kelas"
+								name="classCode"
 								value={formData.classCode}
 								onChange={handleChange}
+								className={`w-full px-4 py-2 border ${errors.classCode ? 'border-red-500' : 'border-gray-300'
+									} rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white/50 backdrop-blur-sm`}
+								required
 							/>
 							{errors.classCode && (
 								<p className="mt-1 text-sm text-red-600">{errors.classCode}</p>
 							)}
 						</div>
+
 						<div>
-							<label htmlFor="password" className="sr-only">Password</label>
+							<label className="block text-sm font-medium text-gray-700 mb-2">
+								Password
+							</label>
 							<input
-								id="password"
-								name="password"
 								type="password"
-								required
-								className={`appearance-none relative block w-full px-3 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'
-									} placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm`}
-								placeholder="Password"
+								name="password"
 								value={formData.password}
 								onChange={handleChange}
+								className={`w-full px-4 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'
+									} rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white/50 backdrop-blur-sm`}
+								required
 							/>
 							{errors.password && (
 								<p className="mt-1 text-sm text-red-600">{errors.password}</p>
 							)}
 						</div>
-					</div>
 
-					<div>
 						<button
 							type="submit"
 							disabled={loading}
-							className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-300"
+							className="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white py-2 px-4 rounded-md hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-[1.02] mt-6"
 						>
-							{loading ? <LoadingSpinner /> : 'Daftar'}
+							{loading ? <LoadingSpinner /> : 'Daftar Sekarang'}
 						</button>
-					</div>
-				</form>
+
+						<p className="text-center text-sm text-gray-600 mt-4">
+							Sudah punya akun?{' '}
+							<Link to="/login" className="text-purple-600 hover:text-purple-800 font-medium">
+								Masuk di sini
+							</Link>
+						</p>
+					</form>
+				</div>
 			</div>
 		</div>
 	);
