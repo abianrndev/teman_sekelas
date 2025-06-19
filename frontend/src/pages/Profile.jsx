@@ -27,7 +27,7 @@ const Profile = () => {
 			setFormData({
 				name: user.name || '',
 				email: user.email || '',
-				classCode: user.class_code || ''
+				classCode: user.classCode || ''
 			});
 
 			setAvatarPreview(
@@ -74,7 +74,7 @@ const Profile = () => {
 			const formData = new FormData();
 			formData.append('avatar', avatarFile);
 
-			await axios.post('/api/users/upload-avatar', formData, {
+			await axios.post('/users/upload-avatar', formData, {
 				headers: {
 					'Content-Type': 'multipart/form-data'
 				}
@@ -103,8 +103,12 @@ const Profile = () => {
 
 		try {
 			setLoading({ ...loading, profile: true });
-			await axios.put('/api/users/profile', {
+			await axios.put('/api/auth/profile', {
 				name: formData.name
+			}, {
+				headers: {
+					Authorization: `Bearer ${localStorage.getItem('token')}`
+				}
 			});
 			setSuccess('Profil berhasil diperbarui!');
 			await fetchUser();
@@ -340,7 +344,7 @@ const Profile = () => {
 										setFormData({
 											name: user.name,
 											email: user.email,
-											classCode: user.class_code
+											classCode: user.classCcode
 										});
 									}}
 									className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"

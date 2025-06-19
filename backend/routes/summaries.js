@@ -67,6 +67,9 @@ router.post('/', auth, upload.single('file'), async (req, res) => {
 
 // Get all summaries for a class with search and filter
 router.get('/class/:classCode', auth, async (req, res) => {
+		console.log('Masuk ke route /summaries/class/:classCode'); // <--- Log ini
+		console.log('req.user:', req.user); // <--- Log ini
+		console.log('req.params.classCode:', req.params.classCode);
 	try {
 		const { search, course, sortBy } = req.query;
 		let query = `

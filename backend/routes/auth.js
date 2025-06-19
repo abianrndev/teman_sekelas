@@ -4,123 +4,153 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const auth = require('../middleware/auth');
+const upload = require('../config/multer');
+
+// Helper for validation errors
+const validateInput = (data) => {
+    const errors = [];
+    if (!data.name) errors.push('name');
+    if (!data.email) errors.push('email');
+    if (!data.password) errors.push('password');
+    if (!data.classCode) errors.push('classCode');
+    return errors;
+};
 
 // Register
-router.post('/register', async (req, res) => {
-	try {
-		console.log('Register request body:', req.body);
+router.post('/register', async(req, res) => {
+    try {
+        const { name, email, password, classCode } = req.body;
 
-		const { name, email, password, classCode } = req.body;
+        const missingFields = validateInput(req.body);
+        if (missingFields.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'All fields are required',
+                missingFields
+            });
+        }
 
-		// Validasi input
-		if (!name || !email || !password || !classCode) {
-			const missingFields = [];
-			if (!name) missingFields.push('name');
-			if (!email) missingFields.push('email');
-			if (!password) missingFields.push('password');
-			if (!classCode) missingFields.push('classCode');
+        if (!/^\S+@\S+\.\S+$/.test(email)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid email format'
+            });
+        }
 
-			return res.status(400).json({
-				success: false,
-				message: 'Semua field harus diisi',
-				missingFields,
-				received: { name, email, password, classCode }
-			});
-		}
+        if (password.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: 'Password must be at least 6 characters'
+            });
+        }
 
-		// Check if user already exists
-		const existingUser = await User.findByEmail(email);
-		if (existingUser) {
-			return res.status(400).json({
-				success: false,
-				message: 'Email sudah terdaftar'
-			});
-		}
+        if (await User.findByEmail(email)) {
+            return res.status(409).json({
+                success: false,
+                message: 'Email already exists'
+            });
+        }
 
-		// Create new user
-		const userId = await User.create({ name, email, password, classCode });
+        const userId = await User.create({ name, email, password, classCode });
+        const newUser = await User.findById(userId);
+        const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-		// Generate token
-		const token = jwt.sign({ id: userId }, process.env.JWT_SECRET);
+        res.status(201).json({
+            success: true,
+            token,
+            user: {
+                id: newUser.id,
+                name: newUser.name,
+                email: newUser.email,
+                classCode: newUser.class_code,
+                avatar: newUser.avatar || null
+            }
+        });
 
-		res.status(201).json({
-			success: true,
-			token
-		});
-	} catch (error) {
-		console.error('Register error:', error);
-		res.status(500).json({
-			success: false,
-			message: 'Error saat membuat user',
-			error: error.message
-		});
-	}
+    } catch (error) {
+        console.error('Registration error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Registration failed',
+            error: error.message
+        });
+    }
 });
 
-// Login
-router.post('/login', async (req, res) => {
-	try {
-		const { email, password } = req.body;
+// Login 
+router.post('/login', async(req, res) => {
+    try {
+        const { email, password } = req.body;
 
-		// Find user
-		const user = await User.findByEmail(email);
-		if (!user) {
-			return res.status(401).json({ message: 'Invalid credentials' });
-		}
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email and password are required'
+            });
+        }
 
-		// Check password
-		const isMatch = await bcrypt.compare(password, user.password);
-		if (!isMatch) {
-			return res.status(401).json({ message: 'Invalid credentials' });
-		}
+        const user = await User.findByEmail(email);
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid credentials'
+            });
+        }
 
-		// Generate token
-		const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-		res.json({ token });
-	} catch (error) {
-		res.status(500).json({ message: 'Error logging in' });
-	}
+        res.json({
+            success: true,
+            token,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                classCode: user.class_code,
+                avatar: user.avatar || null
+            }
+        });
+
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Login failed',
+            error: error.message
+        });
+    }
 });
 
-// Get user profile
-router.get('/me', async (req, res) => {
-	try {
-		const token = req.header('Authorization')?.replace('Bearer ', '');
-		if (!token) {
-			return res.status(401).json({ message: 'No token provided' });
-		}
+// Get current user
+router.get('/me', auth, async(req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
 
-		const decoded = jwt.verify(token, process.env.JWT_SECRET);
-		const user = await User.findById(decoded.id);
+        res.json({
+            success: true,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                classCode: user.class_code,
+                avatar: user.avatar ? `/uploads/${user.avatar}` : null
+            }
+        });
 
-		if (!user) {
-			return res.status(404).json({ message: 'User not found' });
-		}
-
-		res.json(user);
-	} catch (error) {
-		res.status(500).json({ message: 'Error fetching user profile' });
-	}
+    } catch (error) {
+        console.error('Get user error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch user data',
+            error: error.message
+        });
+    }
 });
 
-// Update user profile
-router.put('/profile', auth, async (req, res) => {
-	try {
-		const { name } = req.body;
-
-		if (!name) {
-			return res.status(400).json({ message: 'Nama harus diisi' });
-		}
-
-		await User.update(req.user.id, { name });
-		const updatedUser = await User.findById(req.user.id);
-
-		res.json(updatedUser);
-	} catch (error) {
-		console.error('Error updating profile:', error);
-		res.status(500).json({ message: 'Error saat mengupdate profil' });
-	}
-});
-
-module.exports = router; 
+module.exports = router;

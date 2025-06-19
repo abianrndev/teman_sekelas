@@ -84,13 +84,13 @@ const Navbar = () => {
 											>
 												Edit Profil
 											</Link>
-											<Link
+											{/* <Link
 												to="/settings"
 												className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600"
 												onClick={() => setShowProfileDropdown(false)}
 											>
 												Pengaturan
-											</Link>
+											</Link> */}
 											<button
 												onClick={handleLogout}
 												className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600"

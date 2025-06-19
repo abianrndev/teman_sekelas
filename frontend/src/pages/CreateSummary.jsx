@@ -27,10 +27,11 @@ const CreateSummary = () => {
 		}
 
 		try {
-			await axios.post('/api/summaries', formData, {
+			await axios.post('/summaries', formData, {
 				headers: {
 					'Content-Type': 'multipart/form-data',
-				},
+					Authorization: `Bearer ${localStorage.getItem('token')}`
+				}
 			});
 			navigate('/');
 		} catch (error) {

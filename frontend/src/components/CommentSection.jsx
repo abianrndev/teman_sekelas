@@ -17,13 +17,16 @@ const CommentSection = ({ summaryId }) => {
 
 	const fetchComments = async () => {
 		try {
-			console.log('Fetching comments for summary:', summaryId);
-			const response = await axios.get(`/api/comments/summary/${summaryId}`);
-			console.log('Fetched comments:', response.data);
+			const response = await axios.get(`/api/comments/summary/${summaryId}`, {
+				headers: {
+					Authorization: `Bearer ${localStorage.getItem('token')}`
+				}
+			});
 			setComments(response.data);
-			setLoading(false);
 		} catch (error) {
 			console.error('Error fetching comments:', error);
+		} finally {
+			setLoading(false); // PASTIKAN ADA INI!
 		}
 	};
 
@@ -36,10 +39,14 @@ const CommentSection = ({ summaryId }) => {
 			console.log('Submitting comment:', { content: newComment, summaryId });
 			const response = await axios.post(`/api/comments/summary/${summaryId}`, {
 				content: newComment
+			}, {
+				headers: {
+					Authorization: `Bearer ${localStorage.getItem('token')}`
+				}
 			});
 			console.log('Comment response:', response.data);
 
-			// Pastikan response.data memiliki format yang benar
+
 			if (response.data && response.data.id) {
 				const newCommentData = {
 					id: response.data.id,
@@ -57,7 +64,7 @@ const CommentSection = ({ summaryId }) => {
 				setNewComment('');
 			} else {
 				console.error('Invalid comment response format:', response.data);
-				// Jika format tidak sesuai, fetch ulang komentar
+			
 				await fetchComments();
 			}
 		} catch (error) {

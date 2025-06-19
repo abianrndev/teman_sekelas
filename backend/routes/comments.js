@@ -28,7 +28,7 @@ router.post('/', auth, async (req, res) => {
 	}
 });
 
-// Create new comment through summaries endpoint
+// bikin komen baru
 router.post('/summary/:summaryId', auth, async (req, res) => {
 	try {
 		const { content } = req.body;
@@ -44,7 +44,7 @@ router.post('/summary/:summaryId', auth, async (req, res) => {
 			userId: req.user.id
 		});
 
-		// Ambil komentar yang baru dibuat dengan informasi user
+		// Ambil komen
 		const newComment = await Comment.findById(comment);
 
 		res.status(201).json(newComment);
@@ -54,7 +54,7 @@ router.post('/summary/:summaryId', auth, async (req, res) => {
 	}
 });
 
-// Get all comments for a summary
+// Get all comments 
 router.get('/summary/:summaryId', auth, async (req, res) => {
 	try {
 		const comments = await Comment.findBySummaryId(req.params.summaryId);
@@ -96,7 +96,7 @@ router.put('/:id', auth, async (req, res) => {
 // Delete comment
 router.delete('/:id', auth, async (req, res) => {
 	try {
-		// Cek apakah komentar milik user yang login
+		// ngecek komentar milik user yang login
 		const comment = await Comment.findById(req.params.id);
 		if (!comment) {
 			return res.status(404).json({ message: 'Komentar tidak ditemukan' });
